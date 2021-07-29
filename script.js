@@ -12,6 +12,7 @@ let summaryTable;
 let stageEstimate;
 let summaryTableBody;
 let summaryTableTotal;
+let endSummaryTable;
 let maxPrice = 0;
 let index = 0;
 
@@ -33,6 +34,7 @@ class Estimated {
 	constructor() {
 		this.userData = [];
 		this.totalPrice = 0;
+		this.dataTable = [];
 	}
 
 	// set progress bar width
@@ -41,18 +43,25 @@ class Estimated {
 		progressBar.style.width = `${(this.totalPrice/maxPrice) * 100}%`;
 	}
 
-	addSummaryTable(index) {
+	addSummaryTable(idx) {
 		summaryTableTotal.innerText = `$${this.totalPrice}`;
 		summaryTableBody.innerHTML = `${summaryTableBody.innerHTML}
-			<tr class="table-body__q">
-				<td class="table-body__q--td">${this.userData[index].question}</td>
+			<tr class="table-body__q expanded">
+				<td class="table-body__q--td" data-index="${idx}">${this.userData[idx].question}</td>
 				<td class="table-body__q--td"></td>
 			</tr>
-			<tr class="table-body__a">
-				<td class="table-body__a--td">${this.userData[index].answer}</td>
-				<td class="table-body__a--td" align="right">$${this.userData[index].price}</td>
+			<tr class="table-body__a expanded">
+				<td class="table-body__a--td">${this.userData[idx].answer}</td>
+				<td class="table-body__a--td" align="right">$${this.userData[idx].price}</td>
 			</tr>
 		`;
+
+		let trArray = Array.from(summaryTableBody.querySelectorAll('tr'));
+		trArray = trArray.slice(0, -2);
+
+		trArray.forEach(element => {
+			element.classList.remove('expanded');
+		});
 	}
 
 	removeSummaryTable() {
@@ -60,7 +69,6 @@ class Estimated {
 		summaryTableBody.removeChild(children[length - 1]);
 		summaryTableBody.removeChild(children[length - 2]);
 		summaryTableTotal.innerText = `$${this.totalPrice}`;
-
 	}
 
 	// set pricing on next
@@ -80,14 +88,21 @@ class Estimated {
 	}
 }
 
+
+function animateStart() {
+	progressBarContainer.classList.add('start--animation');
+	stages[0].classList.add('start--animation');
+}
+
 /**
  * Inits estimate
  */
 function startEstimate() {
 	starBtn.remove();
-	progressBarContainer.style.display = 'block';
-	stages[0].style.display = 'block';
+	progressBarContainer.classList.add('start');
+	stages[0].classList.add('start');
 	estimatedNode = new Estimated();
+	setTimeout(animateStart, 400);
 }
 
 /**
@@ -106,8 +121,14 @@ function prevClick() {
 		stagePrev.classList.remove('stage-prev--show');
 	}
 
-	stages[index].style.display = 'none';
-	stages[--index].style.display = 'block';
+	stages[index].classList.remove('start');
+	stages[index].classList.remove('start--animation');
+	--index;
+	stagePrev.style.opacity = 0;
+	stagePrev.classList.add('stage-prev--show');
+	setTimeout(() => stagePrev.style.opacity = 1, 750);
+	stages[index].classList.add('start');
+	setTimeout(() => stages[index].classList.add('start--animation'), 0.1);
 	estimatedNode.removeEstimate(index);
 }
 
@@ -116,11 +137,19 @@ function prevClick() {
  */
 function selectClick() {
 	if (index < stages.length - 1) {
-		stages[index].style.display = 'none';
-		stages[++index].style.display = 'block';
+		stages[index].classList.remove('start');
+		stages[index].classList.remove('start--animation');
+		++index;
+		stages[index].classList.add('start');
+		setTimeout(() => stages[index].classList.add('start--animation'), 0.5);
+		stagePrev.style.opacity = 0;
 		stagePrev.classList.add('stage-prev--show');
+		setTimeout(() => stagePrev.style.opacity = 1, 750);
 		stageEstimate.innerText = `$${estimatedNode.totalPrice}`;
 	}
+
+	if (endSummaryTable.firstChild) endSummaryTable.removeChild(endSummaryTable.firstChild);
+	endSummaryTable.appendChild(summaryTable[0].cloneNode(true));
 }
 
 /**
@@ -166,6 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	progressBarPrice = document.getElementsByClassName('progress-bar-price')[0];
 	summaryTableBody = document.getElementsByClassName('summary-table__body')[0];
 	summaryTableTotal = document.getElementsByClassName('summary-footer__total--sum')[0];
+	endSummaryTable = document.getElementsByClassName('estimate-summary-table')[0];
 
 	if (starBtn) {
 		starBtn.addEventListener('click', () => {
@@ -186,6 +216,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	if (summaryBtn) {
 		summaryBtn.addEventListener('click', toggleSummaryTable);
+	}
+
+	if (summaryTableBody) {
+		summaryTableBody.addEventListener('click', (e) => {
+			if (e.target.hasAttribute('data-index')) {
+				targetIdx = parseInt(e.target.getAttribute('data-index'));
+				while (index > parseInt(targetIdx)) {
+					prevClick();
+				}
+			}
+		});
 	}
 
 	calcMaxPrice();
