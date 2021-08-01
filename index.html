@@ -88,11 +88,8 @@
 								const stages = document.getElementsByClassName("stages");
 								for (let index = 0; index < stages.length - 1; index++) {
 									const dataId = stages[index].getAttribute("data-id");
-									const selectedAnswer = stages[index].querySelector(
-										'.stage-option [data-clickable="true"'
-									);
-									$form[0][dataId].value =
-										selectedAnswer.getAttribute("data-main-answer");
+									const selectedAnswer = stages[index].querySelector('.stage-option [data-clickable="true"]');
+									$form[0][dataId].value = selectedAnswer.getAttribute("data-main-answer");
 								}
 							},
 						});

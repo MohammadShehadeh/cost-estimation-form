@@ -85,9 +85,9 @@ class Estimated {
 		this.userData.pop();
 		this.setProgress();
 		this.removeSummaryTable();
-    
-    const removeSelectedBtn = stages[index].querySelector('.stage-option [data-clickable="true"');
-    removeSelectedBtn.setAttribute('data-clickable', 'false')
+
+		const removeSelectedBtn = stages[index].querySelector('.stage-option [data-clickable="true"');
+		removeSelectedBtn.setAttribute('data-clickable', 'false')
 	}
 }
 
