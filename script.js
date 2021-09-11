@@ -23,7 +23,7 @@ class Node {
 	constructor(element) {
 		this.question = element.getAttribute('data-question');
 		this.answer = element.getAttribute('data-answer');
-		this.price = parseInt(element.getAttribute('data-price'));
+		this.price = parseInt(element.getAttribute('data-price') || 0);
 	}
 }
 
@@ -74,7 +74,7 @@ class Estimated {
 	// set pricing on next
 	setEstimate(element, index) {
 		this.userData[index] = new Node(element);
-		this.totalPrice += this.userData[index].price;
+		this.totalPrice += this.userData[index].price || 0;
 		this.setProgress();
 		this.addSummaryTable(index);
 	}
@@ -85,6 +85,9 @@ class Estimated {
 		this.userData.pop();
 		this.setProgress();
 		this.removeSummaryTable();
+
+		const removeSelectedBtn = stages[index].querySelector('.stage-option [data-clickable="true"');
+		removeSelectedBtn.setAttribute('data-clickable', 'false')
 	}
 }
 
@@ -168,10 +171,10 @@ function calcMaxPrice() {
 
 	let maxNumber = 0;
 	for (let index = 0; index < stageOptions.length; index++) {
-		const priceOptions = stageOptions[index].querySelectorAll('.stage-option [data-clickable="true"');
+		const priceOptions = stageOptions[index].querySelectorAll('.stage-option [data-clickable]');
 
 		for (let priceIndex = 0; priceIndex < priceOptions.length; priceIndex++) {
-			const price = parseInt(priceOptions[priceIndex].getAttribute('data-price'));
+			const price = parseInt(priceOptions[priceIndex].getAttribute('data-price') || 0);
 
 			if (price > maxNumber) {
 				maxNumber = price;
@@ -186,7 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	starBtn = document.getElementById('estimate-btn');
 	progressBarContainer = document.getElementsByClassName('pricing')[0];
 	stages = document.getElementsByClassName('stages');
-	dataClickable = document.querySelectorAll('.stage-option [data-clickable="true"');
+	dataClickable = document.querySelectorAll('.stage-option [data-clickable="false"');
 	summaryBtn = document.getElementsByClassName('summary-btn')[0];
 	summaryTable = document.getElementsByClassName('summary-table');
 	stagePrev = document.getElementsByClassName('stage-prev')[0];
@@ -205,6 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	dataClickable.forEach(button => {
 		button.addEventListener('click', () => {
+		button.setAttribute('data-clickable', 'true');
 			handlePricing(button, index);
 			selectClick();
 		});
